@@ -1,0 +1,70 @@
+<form (ngSubmit)="salvarEdicao()" #form="ngForm" class="form-cadastro">
+  <h2>Editar Horário</h2>
+
+  <div class="ficha-cachorro" *ngIf="horarioEditado.cachorros[0]">
+    <h4>🐾 Ficha do Pet</h4>
+    <p><strong>Nome:</strong> {{ horarioEditado.cachorros[0].nomeCachorro }}</p>
+    <p><strong>Tutor:</strong> {{ horarioEditado.cachorros[0].nomeTutor }}</p>
+    <p><strong>Porte:</strong> {{ horarioEditado.cachorros[0].porte }}</p>
+    <p><strong>Raça:</strong> {{ horarioEditado.cachorros[0].raca }}</p>
+    <p><strong>Contato:</strong> {{ horarioEditado.cachorros[0].contatoTutor }}</p>
+    <p><strong>endereço:</strong> {{ horarioEditado.cachorros[0].endereco }}</p>
+  </div>
+
+    <input
+      matInput
+      type="date"
+      class="inputData"
+      [(ngModel)]="horarioEditado.data"
+      name="data"
+      required
+    />
+
+    <input
+      matInput
+      type="time"
+      class="inputData"
+      [(ngModel)]="horarioEditado.horario"
+      name="horario"
+      required
+    />
+
+  <div class="servicos-section">
+    <label>Serviço Base</label>
+    <div *ngFor="let servico of servicosBaseDisponiveis" class="radio-option">
+      <input
+        type="radio"
+        [id]="'base_' + servico"
+        [value]="servico"
+        name="servicoBase"
+        [(ngModel)]="horarioEditado.servicosBaseSelecionado"
+        (change)="calcularValor()"
+        required
+      />
+      <label [for]="'base_' + servico">{{ servico }}</label>
+    </div>
+  </div>
+
+  <div class="servicos-section">
+    <label>Serviços Adicionais</label>
+    <div *ngFor="let adicional of servicosAdicionaisDisponiveis" class="checkbox-option">
+      <input
+        type="checkbox"
+        [id]="'add_' + adicional"
+        [value]="adicional"
+        [checked]="horarioEditado.adicionais.includes(adicional)"
+        (change)="toggleServicoAdicional(adicional)"
+      />
+      <label [for]="'add_' + adicional">{{ adicional }}</label>
+    </div>
+  </div>
+
+  <div class="valor-total">
+    <strong>Valor Total: R$ {{ horarioEditado.valorTotal.toFixed(2) }}</strong>
+  </div>
+
+  <div class="buttons">
+    <button type="button" class="warnButton" (click)="excluirHorario()">Excluir</button>
+    <button type="submit" [disabled]="form.invalid">Salvar Alterações</button>
+  </div>
+</form>

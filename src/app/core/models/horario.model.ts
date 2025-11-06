@@ -1,10 +1,11 @@
-import { cachorro } from "./cachorro.model";
+import { cachorro } from './cachorro.model';
 
 export interface horario {
   id: string;
-  tutor: string;
-  cachorros: cachorro[];              // Referência direta aos pets selecionados
+  cachorros: cachorro[];
   data: string;
   horario: string;
   valorTotal: number;
+  servicosBaseSelecionado: string;
+  adicionais: string[];
 }

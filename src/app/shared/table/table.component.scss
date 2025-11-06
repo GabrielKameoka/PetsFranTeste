@@ -1,0 +1,18 @@
+mat-table, mat-paginator {
+  overflow: hidden;
+  background-color: #fcacac;
+  box-shadow: none;
+}
+mat-header-cell{
+  font-weight: bold;
+}
+
+*{
+  font-size:medium;
+}
+.filtros{
+  width: 100%;
+  display: flex;
+  gap: 18px;
+  align-items: center;
+}

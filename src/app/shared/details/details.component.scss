@@ -1,0 +1,32 @@
+button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    background-color: #b65151;
+    color: white;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: #cd8f8f;
+    }
+
+}
+.warnButton{
+    background-color: rgb(128, 36, 36);
+}
+
+.buttons{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+h2{
+    font-weight: 900;
+    text-align: center;
+}
+
+strong{
+    font-weight: 900;
+}

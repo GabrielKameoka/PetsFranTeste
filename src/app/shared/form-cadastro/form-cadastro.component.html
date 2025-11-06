@@ -1,0 +1,152 @@
+<form (ngSubmit)="salvar()" #form="ngForm" class="form-cadastro">
+  <h2>
+    {{ tipo === "cachorro" ? "Cadastro de Cachorro" : "Cadastro de Horário" }}
+  </h2>
+
+  <ng-container *ngIf="tipo === 'cachorro'">
+    <input
+      class="inputCachorroContainer"
+      [(ngModel)]="novoCachorro.nomeCachorro"
+      name="nomeCachorro"
+      placeholder="Nome do Cachorro"
+      required
+    />
+    <input
+      class="inputCachorroContainer"
+      [(ngModel)]="novoCachorro.nomeTutor"
+      name="nomeTutor"
+      placeholder="Nome do Tutor"
+      required
+    />
+    <input
+      class="inputCachorroContainer"
+      [(ngModel)]="novoCachorro.contatoTutor"
+      name="contatoTutor"
+      placeholder="Contato"
+      required
+    />
+    <input
+      class="inputCachorroContainer"
+      [(ngModel)]="novoCachorro.endereco"
+      name="endereco"
+      placeholder="Endereço"
+      required
+    />
+
+    <select
+      class="inputCachorroContainer"
+      [(ngModel)]="novoCachorro.porte"
+      name="porte"
+      required
+      (change)="atualizarRacas()"
+    >
+      <option value="" disabled selected>Selecione o porte</option>
+      <option value="Pequeno">Pequeno</option>
+      <option value="Médio">Médio</option>
+      <option value="Grande">Grande</option>
+    </select>
+
+    <select
+      class="inputCachorroContainer"
+      [(ngModel)]="novoCachorro.raca"
+      name="raca"
+      required
+    >
+      <option value="" disabled selected>Selecione a raça</option>
+      <option *ngFor="let raca of racasDisponiveis" [value]="raca">
+        {{ raca }}
+      </option>
+    </select>
+  </ng-container>
+
+  <ng-container *ngIf="tipo === 'horario'">
+    <mat-form-field appearance="outline" class="custom-input">
+      <mat-label>Selecionar Cachorro</mat-label>
+      <input
+        matInput
+        [(ngModel)]="cachorroSelecionado"
+        [matAutocomplete]="auto"
+        name="cachorroSelecionado"
+        (input)="filtrarCachorros()"
+        required
+      />
+      <mat-autocomplete
+        #auto="matAutocomplete"
+        (optionSelected)="selecionarCachorro($event.option.value)"
+      >
+        <mat-option
+          *ngFor="let c of cachorrosFiltrados"
+          [value]="c.nomeCachorro"
+        >
+          {{ c.nomeCachorro }} - {{ c.nomeTutor }} ({{ c.raca }})
+        </mat-option>
+      </mat-autocomplete>
+    </mat-form-field>
+
+    <div *ngIf="cachorroSelecionadoObj" class="ficha-cachorro">
+      <h4>🐾 Ficha do Pet</h4>
+      <p><strong>Nome:</strong> {{ cachorroSelecionadoObj.nomeCachorro }}</p>
+      <p><strong>Tutor:</strong> {{ cachorroSelecionadoObj.nomeTutor }}</p>
+      <p><strong>Porte:</strong> {{ cachorroSelecionadoObj.porte }}</p>
+      <p><strong>Raça:</strong> {{ cachorroSelecionadoObj.raca }}</p>
+      <p><strong>Contato:</strong> {{ cachorroSelecionadoObj.contatoTutor }}</p>
+    </div>
+
+    <input
+      class="inputData"
+      type="date"
+      [(ngModel)]="novoHorario.data"
+      name="data"
+      required
+    />
+    <input
+      class="inputData"
+      type="time"
+      [(ngModel)]="novoHorario.horario"
+      name="horario"
+      required
+    />
+
+    <div class="servicos-section">
+      <label>Serviço Base</label>
+      <div *ngFor="let servico of servicosBaseDisponiveis">
+        <input
+          type="radio"
+          [value]="servico"
+          name="servicoBase"
+          [(ngModel)]="novoHorario.servicosBaseSelecionado"
+          (change)="calcularValor()"
+          required
+        />
+        {{ servico }}
+      </div>
+    </div>
+
+    <div class="servicos-section">
+      <label>Serviços Adicionais</label>
+      <div *ngFor="let adicional of servicosAdicionaisDisponiveis">
+        <input
+          type="checkbox"
+          [value]="adicional"
+          name="adicionais"
+          (change)="
+            novoHorario.adicionais.includes(adicional)
+              ? novoHorario.adicionais.splice(
+                  novoHorario.adicionais.indexOf(adicional),
+                  1
+                )
+              : novoHorario.adicionais.push(adicional);
+            calcularValor()
+          "
+        />
+        {{ adicional }}
+      </div>
+    </div>
+
+    <p>
+      <strong>Valor Total:</strong> R$ {{ novoHorario.valorTotal.toFixed(2) }}
+    </p>
+  </ng-container>
+
+  <button type="submit" [disabled]="form.invalid">Salvar</button>
+</form>

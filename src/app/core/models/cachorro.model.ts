@@ -6,6 +6,4 @@ export interface cachorro {
   endereco: string;
   raca: string;
   porte: string;
-  servicosBase: string;
-  adicionais: string[];
 }

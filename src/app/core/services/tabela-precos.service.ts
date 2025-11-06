@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { cachorro } from '../models/cachorro.model';
+import { horario } from '../models/horario.model';
 
 interface ServicoBase {
   porte: string;
@@ -267,25 +268,27 @@ export class TabelaPrecosService {
 
   //Métodos de cálculos de serviços📏
 
-  getPrecoBasePorCachorro(c: cachorro): number {
-    const item = this.servicosBase.find(s => s.porte === c.porte && s.raca === c.raca);
-    return item?.servicos?.[c.servicosBase] ?? 0;
-  } 
+  getPrecoBasePorCachorro(pet: cachorro, servicosBase: string[]): number {
+    const item = this.servicosBase.find(s => s.porte === pet.porte && s.raca === pet.raca);
+    return servicosBase.reduce((total, nome) => {
+      return total + (item?.servicos[nome] ?? 0);
+    }, 0);
+  }
 
-  getPrecoAdicionalPorCachorro(c: cachorro): number {
-    const porteKey = c.porte === 'Pequeno' ? 'P' : c.porte === 'Médio' ? 'M' : 'G';
-    return c.adicionais.reduce((total, nome) => {
+  getPrecoAdicionalPorCachorro(pet: cachorro, adicionais: string[]): number {
+    const porteKey = pet.porte === 'Pequeno' ? 'P' : pet.porte === 'Médio' ? 'M' : 'G';
+    return adicionais.reduce((total, nome) => {
       return total + (this.adicionais[nome]?.[porteKey] ?? 0);
     }, 0);
   }
 
-  getPrecoTotalPorCachorro(c: cachorro): number {
-    return this.getPrecoBasePorCachorro(c) + this.getPrecoAdicionalPorCachorro(c);
-  }
-
-  getPrecoTotalHorario(cachorros: cachorro[]): number {
-    return cachorros.reduce((total, c) => total + this.getPrecoTotalPorCachorro(c), 0);
-  }
+  getPrecoTotalHorario(horario: horario): number {
+  return horario.cachorros.reduce((total: number, pet: cachorro) => {
+    const base = this.getPrecoBasePorCachorro(pet, [horario.servicosBaseSelecionado]);
+    const adicionais = this.getPrecoAdicionalPorCachorro(pet, horario.adicionais);
+    return total + base + adicionais;
+  }, 0);
+}
 
   getRacasPorPorte(porte: string): string[] {
     return [...new Set(this.servicosBase

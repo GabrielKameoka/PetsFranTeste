@@ -1,13 +1,31 @@
 <header>
-  <h1 routerLink="/home">Pet's Fran</h1>
+  <h1>Pet's Fran</h1>
   <nav>
-    <nav class="buttonsCadastros">
-      <button mat-stroked-button>Cadastrar Horário</button>
-      <button mat-stroked-button>Cadastrar Cachorro</button>
-      <button mat-stroked-button routerLink="/ultimos-30-dias">Últimos 30 dias</button>
-    </nav>
+    <button (click)="abrirFormHorario()">Cadastrar Horário</button>
+    <button (click)="abrirFormCachorro()">Cadastrar Cachorro</button>
+    <button (click)="alternarHorariosConcluidos()">
+      {{ mostrarConcluidos ? "Ver Ativos" : "Últimos 30 dias" }}
+    </button>
   </nav>
 </header>
 
-<!-- Aqui entram os componentes das rotas -->
-<router-outlet></router-outlet>
+<main class="main-container">
+  <div class="pane left-pane">
+    <!-- Tabela -->
+    <app-table
+      [mostrarConcluidos]="mostrarConcluidos"
+      (horarioSelecionado)="mostrarDetalhes($event)"
+    ></app-table>
+  </div>
+
+  <div class="resizer"></div>
+
+  <div class="pane right-pane">
+    <!-- Detalhes -->
+    <app-details
+      [horario]="horarioAtual"
+      [mostrarConcluidos]="mostrarConcluidos"
+      (horarioEditado)="atualizarTabela()"
+    ></app-details>
+  </div>
+</main>

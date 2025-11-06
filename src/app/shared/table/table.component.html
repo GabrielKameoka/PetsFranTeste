@@ -1,0 +1,79 @@
+<div class="filtros">
+  <mat-form-field appearance="outline">
+    <mat-label>Buscar por pet ou tutor</mat-label>
+    <input
+      matInput
+      (keyup)="filtrarTabela($event)"
+      placeholder="Digite para filtrar"
+    />
+  </mat-form-field>
+
+  <mat-form-field appearance="outline">
+    <mat-label>Filtrar por data</mat-label>
+    <input
+      matInput
+      [matDatepicker]="picker"
+      (dateChange)="filtrarPorData($event)"
+      placeholder="Escolha uma data"
+    />
+    <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+    <mat-datepicker #picker></mat-datepicker>
+  </mat-form-field>
+
+  <button mat-button (click)="limparFiltros()">Limpar filtros</button>
+</div>
+
+<ng-container *ngIf="dataSource.filteredData.length > 0; else semResultados">
+  <mat-table
+    [dataSource]="dataSource"
+    class="mat-elevation-z2"
+    style="width: 100%"
+  >
+    <ng-container matColumnDef="cachorro">
+      <mat-header-cell *matHeaderCellDef> Cachorro </mat-header-cell>
+      <mat-cell *matCellDef="let h">
+        {{ h.cachorros[0]?.nomeCachorro }}
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="tutor">
+      <mat-header-cell *matHeaderCellDef> Tutor </mat-header-cell>
+      <mat-cell *matCellDef="let h">
+        {{ h.cachorros[0]?.nomeTutor }}
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="endereco">
+      <mat-header-cell *matHeaderCellDef> Endereço </mat-header-cell>
+      <mat-cell *matCellDef="let h">
+        {{ h.cachorros[0]?.endereco }}
+      </mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="horario">
+      <mat-header-cell *matHeaderCellDef> Horário </mat-header-cell>
+      <mat-cell *matCellDef="let h"> {{  h.data | date:'dd/MM/yyyy' }} - {{ h.horario }} </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row
+      *matRowDef="let row; columns: displayedColumns"
+      (click)="selecionarHorario(row)"
+      style="cursor: pointer"
+    ></mat-row>
+  </mat-table>
+
+  <mat-paginator
+    [pageSize]="10"
+    [pageSizeOptions]="[10, 20]"
+    showFirstLastButtons
+  >
+  </mat-paginator>
+</ng-container>
+
+<ng-template #semResultados>
+  <div style="text-align: center; margin-top: 2rem; color: #888">
+    <p>Nenhum resultado encontrado para os filtros aplicados.</p>
+    <button mat-button (click)="limparFiltros()">Limpar filtros</button>
+  </div>
+</ng-template>
