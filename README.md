@@ -1,27 +1,41 @@
-# PetsFranTeste
+# 🐾 Pet's Fran Agendamento
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.2.16.
+**Pet's Fran Agendamento** é uma aplicação web desenvolvida em Angular com o objetivo de facilitar o agendamento de serviços para pets, como banho, tosa e consultas. O diferencial é que toda a persistência de dados é feita diretamente no navegador do usuário, usando `localStorage`, dispensando backend ou banco de dados externo (futuramente o criador deste repositório irá expandir para um outro repositório full-stack).
 
-## Development server
+---
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## 🚀 Funcionalidades
 
-## Code scaffolding
+- **Cadastro de pets e horários**
+  - Formulário dinâmico via `MatDialog`
+  - Armazenamento local dos dados
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+- **Visualização em tabela**
+  - Lista de agendamentos com alternância entre concluídos e pendentes
+  - Atualização automática após novos cadastros
 
-## Build
+- **Painel de detalhes**
+  - Exibição de informações específicas do agendamento selecionado
+  - Consumo de apis como do Whatsapp e Google Maps
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+- **Interface moderna**
+  - Utilização de Angular Material
+  - Estilização com SCSS
 
-## Running unit tests
+---
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## 🧠 Tecnologias utilizadas
 
-## Running end-to-end tests
+- Angular 16+
+- Angular Material
+- TypeScript
+- SCSS
+- `localStorage` para persistência de dados
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+---
 
-## Further help
+## 📌 Observações
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+- Todos os dados são armazenados localmente no navegador
+- Ideal para protótipos, MVPs ou uso offline
+- Futuramente pode ser integrado com backend em .NET e banco de dados real
