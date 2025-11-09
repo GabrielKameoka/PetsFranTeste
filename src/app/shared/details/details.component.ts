@@ -12,7 +12,8 @@ import { FormEdicaoComponent } from '../form-edicao/form-edicao.component';
 export class DetailsComponent {
   @Input() horario: horario | null = null;
   @Input() mostrarConcluidos: boolean = false;
-  @Output() horarioEditado = new EventEmitter<void>(); // Emite evento quando um horário é editado
+  @Output() horarioEditado = new EventEmitter<void>();
+  @Output() horarioConcluido = new EventEmitter<void>();
 
   constructor(
     private horarioService: HorarioService,
@@ -24,13 +25,18 @@ export class DetailsComponent {
 
     const dialogRef = this.dialog.open(FormEdicaoComponent, {
       width: '240px',
-      data: { horario: this.horario }
+      data: { horario: { ...this.horario } }
     });
 
     dialogRef.afterClosed().subscribe(resultado => {
       if (resultado) {
-        alert('Horário atualizado com sucesso!');
-        this.horarioEditado.emit(); // Notifica o componente pai sobre a edição
+        try {
+          this.horarioService.atualizarHorario(resultado);
+          alert('Horário atualizado com sucesso!');
+          this.horarioEditado.emit();
+        } catch (error) {
+          alert('Erro ao atualizar horário: ' + error);
+        }
       }
     });
   }
@@ -39,6 +45,10 @@ export class DetailsComponent {
     if (this.horario) {
       this.horarioService.removerHorario(this.horario.id);
       this.horarioService.salvarHorarioConcluido(this.horario);
+      this.horarioService.emitirHorariosConcluidos();
+      
+      this.horarioConcluido.emit(); // ⬅️ EMITE O EVENTO
+      
       alert('Horário concluído e movido para histórico por 30 dias.');
     }
   }

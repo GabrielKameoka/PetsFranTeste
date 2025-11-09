@@ -15,14 +15,6 @@ export class AppComponent {
   @Input() mostrarConcluidos: boolean = false;
   @ViewChild(TableComponent) tabela!: TableComponent;
 
-  alternarHorariosConcluidos() {
-    this.mostrarConcluidos = !this.mostrarConcluidos;
-  }
-
-  mostrarDetalhes(h: horario) {
-    this.horarioAtual = h;
-  }
-
   constructor(private dialog: MatDialog) { }
 
   abrirFormCachorro() {
@@ -39,10 +31,22 @@ export class AppComponent {
     });
   }
 
+  alternarHorariosConcluidos() {
+    this.mostrarConcluidos = !this.mostrarConcluidos;
+  }
+
+  mostrarDetalhes(h: horario) {
+    this.horarioAtual = h;
+  }
+
+  limparDetalhes() {
+    this.horarioAtual = null; // ⬅️ LIMPA OS DETALHES
+  }
+
   atualizarTabela() {
-  this.horarioAtual = null; // limpa o painel de detalhes
-  this.tabela.recarregarDados(); // força a tabela a recarregar os dados
-}
+    this.horarioAtual = null; // limpa o painel de detalhes
+    this.tabela.recarregarDados(); // força a tabela a recarregar os dados
+  }
 
 
 }

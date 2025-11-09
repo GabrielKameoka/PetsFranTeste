@@ -1,5 +1,6 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { Subject, takeUntil } from 'rxjs';
 import { cachorro } from 'src/app/core/models/cachorro.model';
 import { horario } from 'src/app/core/models/horario.model';
 import { CachorroService } from 'src/app/core/services/cachorro.service';
@@ -11,7 +12,9 @@ import { TabelaPrecosService } from 'src/app/core/services/tabela-precos.service
   templateUrl: './form-cadastro.component.html',
   styleUrls: ['./form-cadastro.component.scss']
 })
-export class FormCadastroComponent {
+export class FormCadastroComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
   tipo: 'cachorro' | 'horario';
 
   novoCachorro: cachorro = {
@@ -39,6 +42,10 @@ export class FormCadastroComponent {
   servicosBaseDisponiveis: string[] = [];
   servicosAdicionaisDisponiveis: string[] = [];
 
+  //Propriedades para autocomplete
+  cachorroSelecionado: string = '';
+  cachorrosFiltrados: cachorro[] = [];
+
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialogRef: MatDialogRef<FormCadastroComponent>,
@@ -47,16 +54,26 @@ export class FormCadastroComponent {
     private tabelaPrecos: TabelaPrecosService
   ) {
     this.tipo = data.tipo;
-    this.listaCachorros = this.cachorroService.getCachorros();
     this.servicosAdicionaisDisponiveis = this.tabelaPrecos.getServicosAdicionais();
   }
 
-  //Dar opções para a listagem de cachorros na hora de escolher o cachorro em horario
-  cachorroSelecionado: string = '';
-  cachorrosFiltrados: cachorro[] = [];
   ngOnInit() {
+    //Lista reativa de cachorros
+    this.cachorroService.cachorros$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(cachorros => {
+        this.listaCachorros = cachorros;
+        this.cachorrosFiltrados = cachorros; // Atualiza a lista filtrada também
+      });
+
     this.cachorrosFiltrados = this.listaCachorros;
   }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   filtrarCachorros() {
     const termo = this.cachorroSelecionado.toLowerCase();
     this.cachorrosFiltrados = this.listaCachorros.filter(c =>
@@ -64,72 +81,122 @@ export class FormCadastroComponent {
       c.nomeTutor.toLowerCase().includes(termo)
     );
   }
+
   selecionarCachorro(nome: string) {
     const selecionado = this.listaCachorros.find(c =>
-      c.nomeCachorro === nome || c.nomeTutor === nome
+      c.nomeCachorro === nome
     );
+    
     if (selecionado) {
       this.novoHorario.cachorros = [selecionado];
-      this.cachorroSelecionado = `${selecionado.nomeTutor} - ${selecionado.nomeCachorro}`;
+      this.cachorroSelecionado = selecionado.nomeCachorro;
       this.cachorroSelecionadoObj = selecionado;
       this.atualizarServicosBase();
     }
   }
 
-  //logica para mostrar as raças disponíveis de acordo com o porte selecionado
   atualizarRacas() {
     this.racasDisponiveis = this.tabelaPrecos.getRacasPorPorte(this.novoCachorro.porte);
+    this.novoCachorro.raca = ''; 
   }
 
   atualizarServicosBase() {
-    const racas = new Set(this.novoHorario.cachorros.map(c => c.raca));
-    const portes = new Set(this.novoHorario.cachorros.map(c => c.porte));
-    const servicos = new Set<string>();
+    if (!this.cachorroSelecionadoObj) return;
 
-    this.listaCachorros.forEach(c => {
-      if (racas.has(c.raca) && portes.has(c.porte)) {
-        this.tabelaPrecos.getServicosPorRacaPorte(c.raca, c.porte).forEach(s => servicos.add(s));
-      }
-    });
-
-    this.servicosBaseDisponiveis = Array.from(servicos);
+    const porte = this.cachorroSelecionadoObj.porte;
+    const raca = this.cachorroSelecionadoObj.raca;
+    
+    this.servicosBaseDisponiveis = this.tabelaPrecos.getServicosPorRacaPorte(raca, porte);
+    this.novoHorario.servicosBaseSelecionado = '';
     this.calcularValor();
   }
 
   calcularValor() {
+    if (!this.cachorroSelecionadoObj) {
+      this.novoHorario.valorTotal = 0;
+      return;
+    }
+
     const base = this.novoHorario.servicosBaseSelecionado
-      ? this.novoHorario.cachorros.reduce((total, pet) => {
-        return total + this.tabelaPrecos.getPrecoBasePorCachorro(pet, [this.novoHorario.servicosBaseSelecionado]);
-      }, 0)
+      ? this.tabelaPrecos.getPrecoBasePorCachorro(
+          this.cachorroSelecionadoObj, 
+          [this.novoHorario.servicosBaseSelecionado]
+        )
       : 0;
 
-    const adicionais = this.novoHorario.cachorros.reduce((total, pet) => {
-      return total + this.tabelaPrecos.getPrecoAdicionalPorCachorro(pet, this.novoHorario.adicionais);
-    }, 0);
+    const adicionais = this.tabelaPrecos.getPrecoAdicionalPorCachorro(
+      this.cachorroSelecionadoObj, 
+      this.novoHorario.adicionais
+    );
 
     this.novoHorario.valorTotal = base + adicionais;
   }
 
-
+  //Método salvar com tratamento adequado
   salvar() {
     if (this.tipo === 'cachorro') {
-      this.novoCachorro.id = crypto.randomUUID();
-      this.cachorroService.salvarCachorro(this.novoCachorro);
+      this.salvarCachorro();
     } else if (this.tipo === 'horario') {
-      if (
-        !this.novoHorario.cachorros ||
-        !this.novoHorario.data ||
-        !this.novoHorario.horario ||
-        !this.novoHorario.servicosBaseSelecionado
-      ) {
-        alert('Preencha todos os campos obrigatórios.');
-      }
+      this.salvarHorario();
+    }
+  }
 
-      this.novoHorario.id = crypto.randomUUID();
-      this.novoHorario.valorTotal = this.tabelaPrecos.getPrecoTotalHorario(this.novoHorario);
-      this.horarioService.salvarHorario(this.novoHorario);
+  private salvarCachorro() {
+    //Campos obrigatórios
+    if (!this.validarCachorro()) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
     }
 
-    this.dialogRef.close();
+    this.novoCachorro.id = crypto.randomUUID();
+    
+    //Trata retorno do serviço
+    const sucesso = this.cachorroService.salvarCachorro(this.novoCachorro);
+    
+    if (sucesso) {
+      this.dialogRef.close(true); //Fecha com indicador de sucesso
+    } else {
+      alert('Erro: Este cachorro já está cadastrado!');
+    }
+  }
+
+  private salvarHorario() {
+    //Validação completa com return
+    if (!this.validarHorario()) {
+      alert('Preencha todos os campos obrigatórios.');
+      return;
+    }
+
+    this.novoHorario.id = crypto.randomUUID();
+    
+    //Recalcula valor final antes de salvar
+    this.calcularValor();
+    
+    try {
+      this.horarioService.salvarHorario(this.novoHorario);
+      this.dialogRef.close(true); //Fecha com indicador de sucesso
+    } catch (error: any) {
+      alert('Erro ao salvar horário: ' + error.message);
+    }
+  }
+
+  private validarCachorro(): boolean {
+    return !!(
+      this.novoCachorro.nomeCachorro &&
+      this.novoCachorro.nomeTutor &&
+      this.novoCachorro.contatoTutor &&
+      this.novoCachorro.endereco &&
+      this.novoCachorro.porte &&
+      this.novoCachorro.raca
+    );
+  }
+
+  private validarHorario(): boolean {
+    return !!(
+      this.novoHorario.cachorros.length > 0 &&
+      this.novoHorario.data &&
+      this.novoHorario.horario &&
+      this.novoHorario.servicosBaseSelecionado
+    );
   }
 }

@@ -30,7 +30,7 @@ select {
     padding: 8px;
 }
 
-.buttons{
+.buttons {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -50,8 +50,12 @@ button {
     &:hover {
         background-color: #cd8f8f;
     }
+
 }
 
+.warnButton {
+    background-color: rgb(128, 36, 36);
+}
 
 
 .ficha-cachorro {

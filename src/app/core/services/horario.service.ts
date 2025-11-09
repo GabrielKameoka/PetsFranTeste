@@ -8,8 +8,15 @@ import { BehaviorSubject } from 'rxjs';
 export class HorarioService {
   private HORARIOS_KEY = 'horarios';
   private HORARIOS_CONCLUIDOS_KEY = 'horariosConcluidos';
+  
   private horariosSubject = new BehaviorSubject<horario[]>(this.getHorarios());
   horarios$ = this.horariosSubject.asObservable();
+
+  //Inicializar com dados reais e criar método público
+  private horariosConcluidosSubject = new BehaviorSubject<horario[]>(
+    this.getHorariosConcluidos().map(item => item.horario)
+  );
+  horariosConcluidos$ = this.horariosConcluidosSubject.asObservable();
 
   getHorarios(): horario[] {
     const dados = localStorage.getItem(this.HORARIOS_KEY);
@@ -18,6 +25,13 @@ export class HorarioService {
 
   salvarHorario(h: horario): void {
     const lista = this.getHorarios();
+    
+    //Verificar se ID já existe
+    const existe = lista.some(horario => horario.id === h.id);
+    if (existe) {
+      throw new Error(`Horário com ID ${h.id} já existe`);
+    }
+    
     lista.push(h);
     localStorage.setItem(this.HORARIOS_KEY, JSON.stringify(lista));
     this.horariosSubject.next(lista);
@@ -31,7 +45,7 @@ export class HorarioService {
 
   salvarHorarioConcluido(h: horario): void {
     const agora = new Date();
-    const expiraEm = new Date(agora.getTime() + 30 * 24 * 60 * 60 * 1000); // 30 dias
+    const expiraEm = new Date(agora.getTime() + 30 * 24 * 60 * 60 * 1000);
 
     const concluido = {
       horario: h,
@@ -41,6 +55,9 @@ export class HorarioService {
     const lista = this.getHorariosConcluidos();
     lista.push(concluido);
     localStorage.setItem(this.HORARIOS_CONCLUIDOS_KEY, JSON.stringify(lista));
+    
+    //Emitir atualização
+    this.emitirHorariosConcluidos();
   }
 
   getHorariosConcluidos(): { horario: horario; expiraEm: string }[] {
@@ -50,28 +67,24 @@ export class HorarioService {
     const agora = new Date();
     const filtrados = lista.filter((item: any) => new Date(item.expiraEm) > agora);
 
-    // Atualiza o localStorage removendo os expirados
     localStorage.setItem(this.HORARIOS_CONCLUIDOS_KEY, JSON.stringify(filtrados));
-
     return filtrados;
   }
 
-  private horariosConcluidosSubject = new BehaviorSubject<horario[]>([]);
-  horariosConcluidos$ = this.horariosConcluidosSubject.asObservable();
-
+  //Método público para forçar atualização
   emitirHorariosConcluidos() {
     const lista = this.getHorariosConcluidos().map(item => item.horario);
     this.horariosConcluidosSubject.next(lista);
   }
 
   atualizarHorario(horarioAtualizado: horario): void {
-  const horarios = this.getHorarios();
-  const index = horarios.findIndex(h => h.id === horarioAtualizado.id);
-  
-  if (index > -1) {
-    horarios[index] = horarioAtualizado;
-    localStorage.setItem(this.HORARIOS_KEY, JSON.stringify(horarios));
-    this.horariosSubject.next(horarios); // Emite a atualização para todos os subscribers
+    const horarios = this.getHorarios();
+    const index = horarios.findIndex(h => h.id === horarioAtualizado.id);
+    
+    if (index > -1) {
+      horarios[index] = horarioAtualizado;
+      localStorage.setItem(this.HORARIOS_KEY, JSON.stringify(horarios));
+      this.horariosSubject.next(horarios);
+    }
   }
-}
 }

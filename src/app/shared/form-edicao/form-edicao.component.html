@@ -8,7 +8,7 @@
     <p><strong>Porte:</strong> {{ horarioEditado.cachorros[0].porte }}</p>
     <p><strong>Raça:</strong> {{ horarioEditado.cachorros[0].raca }}</p>
     <p><strong>Contato:</strong> {{ horarioEditado.cachorros[0].contatoTutor }}</p>
-    <p><strong>endereço:</strong> {{ horarioEditado.cachorros[0].endereco }}</p>
+    <p><strong>Endereço:</strong> {{ horarioEditado.cachorros[0].endereco }}</p>
   </div>
 
     <input
@@ -64,7 +64,7 @@
   </div>
 
   <div class="buttons">
-    <button type="button" class="warnButton" (click)="excluirHorario()">Excluir</button>
     <button type="submit" [disabled]="form.invalid">Salvar Alterações</button>
+    <button type="button" class="warnButton" (click)="excluirHorario()">Excluir</button>
   </div>
 </form>

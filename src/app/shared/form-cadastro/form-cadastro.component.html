@@ -84,12 +84,15 @@
     </mat-form-field>
 
     <div *ngIf="cachorroSelecionadoObj" class="ficha-cachorro">
-      <h4>🐾 Ficha do Pet</h4>
-      <p><strong>Nome:</strong> {{ cachorroSelecionadoObj.nomeCachorro }}</p>
-      <p><strong>Tutor:</strong> {{ cachorroSelecionadoObj.nomeTutor }}</p>
-      <p><strong>Porte:</strong> {{ cachorroSelecionadoObj.porte }}</p>
-      <p><strong>Raça:</strong> {{ cachorroSelecionadoObj.raca }}</p>
-      <p><strong>Contato:</strong> {{ cachorroSelecionadoObj.contatoTutor }}</p>
+      <h4>🐾 Ficha do Pet Selecionado</h4>
+      <div class="ficha-content">
+        <p><strong>Nome:</strong> {{ cachorroSelecionadoObj.nomeCachorro }}</p>
+        <p><strong>Tutor:</strong> {{ cachorroSelecionadoObj.nomeTutor }}</p>
+        <p><strong>Porte:</strong> {{ cachorroSelecionadoObj.porte }}</p>
+        <p><strong>Raça:</strong> {{ cachorroSelecionadoObj.raca }}</p>
+        <p><strong>Contato:</strong> {{ cachorroSelecionadoObj.contatoTutor }}</p>
+        <p><strong>Endereço:</strong> {{ cachorroSelecionadoObj.endereco }}</p>
+      </div>
     </div>
 
     <input
@@ -148,5 +151,7 @@
     </p>
   </ng-container>
 
-  <button type="submit" [disabled]="form.invalid">Salvar</button>
+  <button type="submit" [disabled]="form.invalid" class="submit-button">
+    {{ form.invalid ? "Preencha todos os campos" : "Salvar" }}
+  </button>
 </form>
